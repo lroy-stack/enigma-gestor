@@ -1,0 +1,277 @@
+
+/* iOS Design System para Enigma Cocina con Alma */
+
+/* ============================================
+   BASE COMPONENTS - iOS FOUNDATION
+   ============================================ */
+
+/* Typography Classes - iOS Text Hierarchy */
+.ios-text-caption2 { @apply text-ios-caption2; }
+.ios-text-caption1 { @apply text-ios-caption1; }
+.ios-text-footnote { @apply text-ios-footnote; }
+.ios-text-subhead { @apply text-ios-subhead; }
+.ios-text-callout { @apply text-ios-callout; }
+.ios-text-body { @apply text-ios-body; }
+.ios-text-headline { @apply text-ios-headline; }
+.ios-text-title3 { @apply text-ios-title3; }
+.ios-text-title2 { @apply text-ios-title2; }
+.ios-text-title1 { @apply text-ios-title1; }
+.ios-text-large-title { @apply text-ios-large-title; }
+
+/* Layout Components */
+.ios-safe-area {
+  @apply px-4 py-6;
+}
+
+.ios-navbar {
+  @apply bg-white/95 backdrop-blur-lg border-b border-gray-200 px-6 py-4 sticky top-0 z-50;
+}
+
+.ios-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5;
+}
+
+/* Card Components */
+.ios-card {
+  @apply bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden;
+}
+
+.ios-card-elevated {
+  @apply bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden;
+}
+
+.ios-card-glass {
+  @apply bg-white/90 backdrop-blur-lg rounded-xl shadow-lg border border-white/30 overflow-hidden;
+}
+
+/* Button Components */
+.ios-button {
+  @apply inline-flex items-center justify-center font-sf font-medium rounded-xl transition-all duration-200 active:scale-95 cursor-pointer;
+}
+
+.ios-button-primary {
+  @apply bg-blue-600 text-white shadow-lg hover:bg-blue-700 active:bg-blue-800;
+}
+
+.ios-button-secondary {
+  @apply bg-green-600 text-white hover:bg-green-700 active:bg-green-800;
+}
+
+.ios-button-accent {
+  @apply bg-orange-600 text-white hover:bg-orange-700 active:bg-orange-800;
+}
+
+.ios-button-ghost {
+  @apply bg-transparent text-blue-600 hover:bg-blue-50 active:bg-blue-100;
+}
+
+.ios-button-outline {
+  @apply border-2 border-blue-600 text-blue-600 bg-transparent hover:bg-blue-600 hover:text-white active:bg-blue-700 active:text-white;
+}
+
+.ios-button-icon {
+  @apply w-11 h-11 rounded-xl;
+}
+
+/* Badge Components */
+.ios-badge {
+  @apply inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border;
+}
+
+.ios-badge-available {
+  @apply bg-green-50 text-green-700 border-green-200;
+}
+
+.ios-badge-occupied {
+  @apply bg-red-50 text-red-700 border-red-200;
+}
+
+.ios-badge-reserved {
+  @apply bg-yellow-50 text-yellow-700 border-yellow-200;
+}
+
+.ios-badge-cleaning {
+  @apply bg-blue-50 text-blue-700 border-blue-200;
+}
+
+.ios-badge-maintenance {
+  @apply bg-gray-50 text-gray-700 border-gray-200;
+}
+
+.ios-badge-lg {
+  @apply px-3 py-2 text-sm;
+}
+
+/* Interactive Elements */
+.ios-touch-feedback {
+  @apply transition-all duration-200 active:scale-98 cursor-pointer;
+}
+
+.ios-touch-feedback:active {
+  transform: scale(0.98);
+}
+
+.ios-hover-lift:hover {
+  @apply transform -translate-y-1 shadow-2xl;
+}
+
+/* Animation Classes */
+.animate-ios-spring {
+  animation: ios-spring 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.animate-fade-slide-up {
+  animation: fade-slide-up 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Additional Spacing Classes */
+.enigma-spacing-xs { @apply p-2; }
+.enigma-spacing-sm { @apply p-4; }
+.enigma-spacing-md { @apply p-6; }
+.enigma-spacing-lg { @apply p-8; }
+.enigma-spacing-xl { @apply p-12; }
+
+/* Enhanced Card Variants */
+.enigma-card-premium {
+  @apply bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-2xl border border-gray-100;
+}
+
+.enigma-card-stats {
+  @apply bg-white rounded-xl p-6 shadow-lg border border-gray-100 relative overflow-hidden;
+}
+
+/* Keyframes for animations */
+@keyframes ios-spring {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scale-in {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .ios-grid {
+    @apply grid-cols-1 gap-4;
+  }
+  
+  .ios-safe-area {
+    @apply px-4 py-4;
+  }
+  
+  .ios-navbar {
+    @apply px-4 py-3;
+  }
+}
+
+/* Dark Mode Support (Future) */
+@media (prefers-color-scheme: dark) {
+  .ios-card {
+    /* Future dark mode implementation */
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .ios-button {
+    @apply border border-current;
+  }
+  
+  .ios-badge {
+    @apply border-2;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .ios-button,
+  .ios-touch-feedback {
+    @apply shadow-none transform-none;
+  }
+}
+
+/* Enhanced Touch States */
+.hover\:scale-102:hover {
+  transform: scale(1.02);
+}
+
+.active\:scale-98:active {
+  transform: scale(0.98);
+}
+
+/* Glass Effect Utilities */
+.backdrop-blur-lg {
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+
+.backdrop-blur-xl {
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+
+/* iOS Shadow System */
+.shadow-ios {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.shadow-ios-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.shadow-ios-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.shadow-ios-2xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* iOS Border Radius System */
+.rounded-ios {
+  border-radius: 10px;
+}
+
+.rounded-ios-lg {
+  border-radius: 16px;
+}
+
+.rounded-ios-xl {
+  border-radius: 20px;
+}
+
+.rounded-ios-2xl {
+  border-radius: 24px;
+}

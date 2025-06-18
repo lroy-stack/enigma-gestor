@@ -1,0 +1,501 @@
+{
+  "metadata": {
+    "exported_at": "2025-06-16T16:35:36.528Z",
+    "exported_by": "Enigma Cocina con Alma",
+    "version": "1.0",
+    "format": "json"
+  },
+  "restaurant_config": {
+    "nombre_restaurante": "Enigma Cocina con Alma",
+    "direccion": "España",
+    "telefono": "+34 XXX XXX XXX",
+    "email_reservas": "reservas@enigmaconalma.com",
+    "capacidad_maxima": 88,
+    "duracion_reserva_default_minutos": 120,
+    "auto_aceptar_reservas": false,
+    "politica_cancelacion": "Cancelaciones gratuitas hasta 24h antes. Cancelaciones tardías pueden incurrir en penalización.",
+    "mensaje_bienvenida_email": "¡Bienvenido a Enigma Cocina con Alma! Gracias por elegirnos para tu experiencia gastronómica.",
+    "mensaje_confirmacion_whatsapp": "Hola {nombre}, tu reserva en Enigma Cocina con Alma está confirmada para el {fecha} a las {hora}. ¡Te esperamos!"
+  },
+  "tables_config": [
+    {
+      "numero_mesa": "M1",
+      "capacidad": 2,
+      "tipo_mesa": "estandar",
+      "position_x": 60,
+      "position_y": 280,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Lateral",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M10",
+      "capacidad": 4,
+      "tipo_mesa": "estandar",
+      "position_x": 300,
+      "position_y": 260,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona posterior",
+      "notas_mesa": "Mesa grande horizontal",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M2",
+      "capacidad": 4,
+      "tipo_mesa": "estandar",
+      "position_x": 60,
+      "position_y": 140,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona central",
+      "notas_mesa": "Mesa combinable 2p + 2p",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M3",
+      "capacidad": 2,
+      "tipo_mesa": "estandar",
+      "position_x": 60,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona frontal",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M4",
+      "capacidad": 4,
+      "tipo_mesa": "estandar",
+      "position_x": 200,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona central",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M5",
+      "capacidad": 4,
+      "tipo_mesa": "estandar",
+      "position_x": 340,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona central",
+      "notas_mesa": "Mesa combinable 2p + 2p",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M6",
+      "capacidad": 4,
+      "tipo_mesa": "estandar",
+      "position_x": 420,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona central",
+      "notas_mesa": "Mesa combinable 2p + 2p",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M7",
+      "capacidad": 2,
+      "tipo_mesa": "estandar",
+      "position_x": 200,
+      "position_y": 180,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona media",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "M8",
+      "capacidad": 2,
+      "tipo_mesa": "estandar",
+      "position_x": 340,
+      "position_y": 180,
+      "activa": true,
+      "ubicacion_descripcion": "Sala Interior - Zona media",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T1",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 40,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T10",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 690,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila inferior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T11",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 760,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila inferior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T12",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 830,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila inferior",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T13",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 920,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila inferior",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T14",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 1010,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila inferior",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T2",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 110,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T20",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 40,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona principal",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T21",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 150,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona principal",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T22",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 260,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona principal",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T23",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 370,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona principal",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T24",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 500,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona lateral",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T25",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 570,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona lateral",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T26",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 640,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona lateral",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T27",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 710,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona lateral",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T28",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_inferior",
+      "position_x": 780,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Justicia - Zona lateral",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T3",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 180,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T4",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 250,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T5",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 320,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T6",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 390,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T7",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 460,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T8",
+      "capacidad": 2,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 530,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila superior",
+      "notas_mesa": "Mesa 2 personas",
+      "es_combinable_con": null
+    },
+    {
+      "numero_mesa": "T9",
+      "capacidad": 4,
+      "tipo_mesa": "terraza_superior",
+      "position_x": 600,
+      "position_y": 80,
+      "activa": true,
+      "ubicacion_descripcion": "Terraza Campanar - Fila inferior",
+      "notas_mesa": "Mesa 4 personas",
+      "es_combinable_con": null
+    }
+  ],
+  "operating_hours": [
+    {
+      "dia_semana": "Domingo",
+      "dia_numero": 0,
+      "hora_apertura": "13:00:00",
+      "hora_cierre": "16:00:00",
+      "tipo_servicio": "almuerzo",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Domingo",
+      "dia_numero": 0,
+      "hora_apertura": "18:00:00",
+      "hora_cierre": "23:00:00",
+      "tipo_servicio": "cena",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Lunes",
+      "dia_numero": 1,
+      "hora_apertura": "00:00:00",
+      "hora_cierre": "00:00:00",
+      "tipo_servicio": "continuo",
+      "activo": false,
+      "notas": null
+    },
+    {
+      "dia_semana": "Martes",
+      "dia_numero": 2,
+      "hora_apertura": "18:30:00",
+      "hora_cierre": "23:00:00",
+      "tipo_servicio": "cena",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Miércoles",
+      "dia_numero": 3,
+      "hora_apertura": "18:00:00",
+      "hora_cierre": "23:00:00",
+      "tipo_servicio": "cena",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Miércoles",
+      "dia_numero": 3,
+      "hora_apertura": "13:00:00",
+      "hora_cierre": "16:00:00",
+      "tipo_servicio": "almuerzo",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Jueves",
+      "dia_numero": 4,
+      "hora_apertura": "18:00:00",
+      "hora_cierre": "23:00:00",
+      "tipo_servicio": "cena",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Jueves",
+      "dia_numero": 4,
+      "hora_apertura": "13:00:00",
+      "hora_cierre": "16:00:00",
+      "tipo_servicio": "almuerzo",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Viernes",
+      "dia_numero": 5,
+      "hora_apertura": "13:00:00",
+      "hora_cierre": "16:00:00",
+      "tipo_servicio": "almuerzo",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Viernes",
+      "dia_numero": 5,
+      "hora_apertura": "18:00:00",
+      "hora_cierre": "23:00:00",
+      "tipo_servicio": "cena",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Sábado",
+      "dia_numero": 6,
+      "hora_apertura": "18:00:00",
+      "hora_cierre": "23:00:00",
+      "tipo_servicio": "cena",
+      "activo": true,
+      "notas": null
+    },
+    {
+      "dia_semana": "Sábado",
+      "dia_numero": 6,
+      "hora_apertura": "13:00:00",
+      "hora_cierre": "16:00:00",
+      "tipo_servicio": "almuerzo",
+      "activo": true,
+      "notas": null
+    }
+  ],
+  "notifications_config": {
+    "nuevas_reservas": true,
+    "cambios_reservas": true,
+    "no_shows": true,
+    "sonido_activo": true,
+    "canales_activos": [
+      "email",
+      "whatsapp",
+      "sms"
+    ]
+  },
+  "security_config": {
+    "respaldo_automatico": true,
+    "frecuencia_respaldo": "daily",
+    "sincronizacion_nube": true,
+    "ultimo_respaldo": "2025-06-16T16:35:36.529Z"
+  }
+}
