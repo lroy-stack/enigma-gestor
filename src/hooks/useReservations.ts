@@ -1,4 +1,3 @@
-
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Reserva, ReservaFormData } from '@/types/database';
@@ -184,23 +183,9 @@ export function useCreateReservation() {
   
   return useMutation({
     mutationFn: async (reservationData: any) => {
-      // Crear la reserva directamente con los campos del nuevo formulario
       const { data, error } = await supabase
         .from('reservas')
-        .insert([{
-          nombre: reservationData.nombre,
-          email: reservationData.email,
-          telefono: reservationData.telefono,
-          fecha_reserva: reservationData.fecha_reserva,
-          hora_reserva: reservationData.hora_reserva,
-          personas: reservationData.personas,
-          ocasion: reservationData.ocasion || null,
-          preferencia_mesa: reservationData.preferencia_mesa,
-          requisitos_dieteticos: reservationData.requisitos_dieteticos || null,
-          notas: reservationData.notas || null,
-          primera_visita: reservationData.primera_visita,
-          estado: 'pendiente'
-        }])
+        .insert([reservationData])
         .select()
         .single();
       
