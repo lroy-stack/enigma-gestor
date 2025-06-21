@@ -1,57 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Bell, X, Check, Clock, AlertCircle, Users, Calendar } from 'lucide-react';
 import { IOSCard, IOSCardContent } from '@/components/ui/ios-card';
 import { IOSButton } from '@/components/ui/ios-button';
 import { IOSBadge } from '@/components/ui/ios-badge';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-
-interface Notification {
-  id: string;
-  type: 'reservation' | 'customer' | 'system' | 'alert';
-  title: string;
-  message: string;
-  timestamp: Date;
-  read: boolean;
-  urgent?: boolean;
-}
-
-// Datos de ejemplo
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'reservation',
-    title: 'Nueva Reserva',
-    message: 'Mesa para 4 personas hoy a las 20:30',
-    timestamp: new Date(Date.now() - 5 * 60 * 1000), // hace 5 minutos
-    read: false,
-    urgent: true
-  },
-  {
-    id: '2',
-    type: 'customer',
-    title: 'Cliente VIP',
-    message: 'María García ha llegado - Mesa 12',
-    timestamp: new Date(Date.now() - 15 * 60 * 1000), // hace 15 minutos
-    read: false
-  },
-  {
-    id: '3',
-    type: 'alert',
-    title: 'Mesa Libre',
-    message: 'Mesa 8 disponible tras cancelación',
-    timestamp: new Date(Date.now() - 30 * 60 * 1000), // hace 30 minutos
-    read: true
-  },
-  {
-    id: '4',
-    type: 'system',
-    title: 'Respaldo Completado',
-    message: 'Copia de seguridad realizada correctamente',
-    timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000), // hace 2 horas
-    read: true
-  }
-];
+import { useNotifications } from '@/hooks/useNotifications';
+import { useNavigate } from 'react-router-dom';
+import type { Notification } from '@/hooks/useNotifications';
 
 interface NotificationsDropdownProps {
   isOpen: boolean;
@@ -59,64 +15,74 @@ interface NotificationsDropdownProps {
 }
 
 export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdownProps) {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const { 
+    notifications, 
+    loading, 
+    unreadCount, 
+    markAsRead, 
+    markAllAsRead 
+  } = useNotifications();
+  const navigate = useNavigate();
   
   if (!isOpen) return null;
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  // Mostrar solo las últimas 5 notificaciones en el dropdown
+  const recentNotifications = notifications.slice(0, 5);
 
-  const getNotificationIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'reservation':
+  const getNotificationIcon = (typeCode: string) => {
+    // Mapear códigos de tipo a iconos
+    switch (typeCode) {
+      case 'reservation_new':
+      case 'reservation_cancelled':
+      case 'reservation_confirmed':
         return Calendar;
-      case 'customer':
+      case 'customer_arrived':
+      case 'customer_vip':
         return Users;
+      case 'table_available':
+      case 'table_occupied':
       case 'alert':
         return AlertCircle;
       case 'system':
+      case 'backup':
         return Clock;
       default:
         return Bell;
     }
   };
 
-  const getNotificationColor = (type: Notification['type'], urgent?: boolean) => {
-    if (urgent) return '#CB5910'; // Naranja de acento para urgentes
+  const getNotificationColor = (typeCode: string, priority: string) => {
+    if (priority === 'high') return '#CB5910'; // Naranja para alta prioridad
     
-    switch (type) {
-      case 'reservation':
+    switch (typeCode) {
+      case 'reservation_new':
+      case 'reservation_confirmed':
         return '#237584'; // Azul principal
-      case 'customer':
+      case 'customer_arrived':
+      case 'customer_vip':
         return '#9FB289'; // Verde secundario
+      case 'reservation_cancelled':
+      case 'table_available':
       case 'alert':
         return '#CB5910'; // Naranja de acento
       case 'system':
+      case 'backup':
         return '#8E8E93'; // Gris iOS
       default:
         return '#237584';
     }
   };
 
-  const markAsRead = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.map(notification => 
-        notification.id === notificationId 
-          ? { ...notification, read: true }
-          : notification
-      )
-    );
+  const handleNotificationClick = (notification: Notification) => {
+    if (!notification.is_read) {
+      markAsRead(notification.id);
+    }
+    onClose();
   };
 
-  const markAllAsRead = () => {
-    setNotifications(prev => 
-      prev.map(notification => ({ ...notification, read: true }))
-    );
-  };
-
-  const deleteNotification = (notificationId: string) => {
-    setNotifications(prev => 
-      prev.filter(notification => notification.id !== notificationId)
-    );
+  const handleViewAll = () => {
+    navigate('/notificaciones');
+    onClose();
   };
 
   return (
@@ -175,7 +141,14 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
 
         {/* Notifications List */}
         <div className="overflow-y-auto max-h-96">
-          {notifications.length === 0 ? (
+          {loading ? (
+            <div className="p-8 text-center">
+              <div className="w-8 h-8 border-2 border-enigma-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="ios-text-body text-enigma-neutral-600">
+                Cargando notificaciones...
+              </p>
+            </div>
+          ) : recentNotifications.length === 0 ? (
             <div className="p-8 text-center">
               <div 
                 className="w-16 h-16 rounded-ios-lg flex items-center justify-center mx-auto mb-4"
@@ -192,18 +165,19 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
             </div>
           ) : (
             <div className="p-2">
-              {notifications.map((notification) => {
-                const IconComponent = getNotificationIcon(notification.type);
-                const color = getNotificationColor(notification.type, notification.urgent);
+              {recentNotifications.map((notification) => {
+                const IconComponent = getNotificationIcon(notification.type_code);
+                const color = getNotificationColor(notification.type_code, notification.priority);
                 
                 return (
                   <div
                     key={notification.id}
-                    className={`p-3 rounded-ios-lg mb-2 transition-all duration-200 ios-touch-feedback ${
-                      !notification.read 
+                    className={`p-3 rounded-ios-lg mb-2 transition-all duration-200 ios-touch-feedback cursor-pointer ${
+                      !notification.is_read 
                         ? 'bg-enigma-primary/5 border border-enigma-primary/20' 
                         : 'bg-enigma-neutral-50 hover:bg-enigma-neutral-100'
                     }`}
+                    onClick={() => handleNotificationClick(notification)}
                   >
                     <div className="flex items-start gap-3">
                       <div 
@@ -220,12 +194,12 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
                               <h4 className="ios-text-callout font-semibold text-enigma-neutral-900 truncate">
                                 {notification.title}
                               </h4>
-                              {notification.urgent && (
+                              {notification.priority === 'high' && (
                                 <IOSBadge variant="custom" size="lg" style={{ backgroundColor: '#CB5910', color: 'white' }}>
                                   Urgente
                                 </IOSBadge>
                               )}
-                              {!notification.read && (
+                              {!notification.is_read && (
                                 <div className="w-2 h-2 bg-enigma-primary rounded-full" />
                               )}
                             </div>
@@ -233,29 +207,24 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
                               {notification.message}
                             </p>
                             <p className="ios-text-caption2 text-enigma-neutral-500">
-                              {format(notification.timestamp, 'HH:mm', { locale: es })}
+                              {format(new Date(notification.created_at), 'HH:mm', { locale: es })}
                             </p>
                           </div>
                           
                           <div className="flex flex-col gap-1">
-                            {!notification.read && (
+                            {!notification.is_read && (
                               <IOSButton
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => markAsRead(notification.id)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  markAsRead(notification.id);
+                                }}
                                 className="w-8 h-8 p-0"
                               >
                                 <Check size={14} className="text-enigma-primary" />
                               </IOSButton>
                             )}
-                            <IOSButton
-                              size="sm"
-                              variant="ghost"
-                              onClick={() => deleteNotification(notification.id)}
-                              className="w-8 h-8 p-0"
-                            >
-                              <X size={14} className="text-enigma-neutral-400" />
-                            </IOSButton>
                           </div>
                         </div>
                       </div>
@@ -268,11 +237,12 @@ export function NotificationsDropdown({ isOpen, onClose }: NotificationsDropdown
         </div>
 
         {/* Footer */}
-        {notifications.length > 0 && (
+        {recentNotifications.length > 0 && (
           <div className="p-4 border-t border-enigma-neutral-200 bg-enigma-neutral-50">
             <IOSButton
               variant="ghost"
               className="w-full justify-center ios-text-footnote text-enigma-primary"
+              onClick={handleViewAll}
             >
               Ver todas las notificaciones
             </IOSButton>

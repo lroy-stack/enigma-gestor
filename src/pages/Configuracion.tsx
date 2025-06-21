@@ -5,7 +5,8 @@ import {
   ChevronRight, ChevronDown, ToggleLeft, ToggleRight,
   AlertCircle, CheckCircle, Volume2, Languages,
   Download, RotateCcw, Globe, Smartphone, Calendar,
-  Wifi, Activity, RefreshCw, Info
+  Wifi, Activity, RefreshCw, Info, MessageSquare,
+  Instagram, ExternalLink, Navigation, X, Coffee, Moon
 } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,8 @@ import { IOSCard, IOSCardContent, IOSCardHeader, IOSCardTitle } from '@/componen
 import { IOSBadge } from '@/components/ui/ios-badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useRestaurantConfig } from '@/hooks/useRestaurantConfig';
+import { useFooterConfig } from '@/hooks/useFooterConfig';
+import { useReservationContent } from '@/hooks/useReservationContent';
 import { useTables } from '@/hooks/useTables';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -229,14 +232,44 @@ const SettingRow = ({
 );
 
 export default function Configuracion() {
-  const { config, horarios, loading, updateConfig, updateHorario } = useRestaurantConfig();
+  const { 
+    config, 
+    horarios, 
+    horariosPublicos, 
+    loading, 
+    updateConfig, 
+    updateHorario,
+    addHorarioPublico,
+    updateHorarioPublico,
+    removeHorarioPublico
+  } = useRestaurantConfig();
+  const { footerInfo, loading: footerLoading, updateFooterInfo, createFooterInfo } = useFooterConfig();
+  const { 
+    reservationContent, 
+    loading: reservationLoading, 
+    updateReservationContent,
+    createReservationContent,
+    addHorarioComida,
+    addHorarioCena,
+    removeHorarioComida,
+    removeHorarioCena
+  } = useReservationContent();
   const { data: tables, isLoading: tablesLoading, error: tablesError } = useTables();
   const { toast } = useToast();
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [showExportModal, setShowExportModal] = useState(false);
+  const [newPublicSchedule, setNewPublicSchedule] = useState({ days: '', hours: '' });
+  
+  // Estados locales para edición (no se guardan hasta hacer click en "Guardar")
+  const [localConfig, setLocalConfig] = useState(config);
+  const [localHorariosPublicos, setLocalHorariosPublicos] = useState(horariosPublicos);
+  const [localFooterInfo, setLocalFooterInfo] = useState(footerInfo);
+  const [localReservationContent, setLocalReservationContent] = useState(reservationContent);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     restaurant: true,
+    footer: false,
     tables: false,
     schedule: false,
     notifications: false,
@@ -249,11 +282,91 @@ export default function Configuracion() {
     return () => clearInterval(timer);
   }, []);
 
+  // Sincronizar estados locales cuando se cargan los datos
+  React.useEffect(() => {
+    setLocalConfig(config);
+  }, [config]);
+
+  React.useEffect(() => {
+    setLocalHorariosPublicos(horariosPublicos);
+  }, [horariosPublicos]);
+
+  React.useEffect(() => {
+    setLocalFooterInfo(footerInfo);
+  }, [footerInfo]);
+
+  React.useEffect(() => {
+    setLocalReservationContent(reservationContent);
+  }, [reservationContent]);
+
   const toggleExpanded = (section: keyof typeof expandedSections) => {
     setExpandedSections(prev => ({
       ...prev,
       [section]: !prev[section]
     }));
+  };
+
+  // Funciones para manejar cambios locales
+  const handleLocalConfigChange = (updates: any) => {
+    setLocalConfig(prev => prev ? { ...prev, ...updates } : null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalHorarioPublicoChange = (index: number, updates: any) => {
+    setLocalHorariosPublicos(prev => {
+      const newHorarios = [...prev];
+      newHorarios[index] = { ...newHorarios[index], ...updates };
+      return newHorarios;
+    });
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalAddHorarioPublico = (days: string, hours: string) => {
+    setLocalHorariosPublicos(prev => [...prev, { days, hours }]);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalRemoveHorarioPublico = (index: number) => {
+    setLocalHorariosPublicos(prev => prev.filter((_, i) => i !== index));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalFooterChange = (updates: any) => {
+    setLocalFooterInfo(prev => prev ? { ...prev, ...updates } : null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalReservationContentChange = (updates: any) => {
+    setLocalReservationContent(prev => prev ? { ...prev, ...updates } : null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalAddHorarioComida = (horario: string) => {
+    if (!localReservationContent) return;
+    const nuevosHorarios = [...(localReservationContent.horarios_comida || []), horario];
+    setLocalReservationContent(prev => prev ? { ...prev, horarios_comida: nuevosHorarios } : null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalAddHorarioCena = (horario: string) => {
+    if (!localReservationContent) return;
+    const nuevosHorarios = [...(localReservationContent.horarios_cena || []), horario];
+    setLocalReservationContent(prev => prev ? { ...prev, horarios_cena: nuevosHorarios } : null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalRemoveHorarioComida = (index: number) => {
+    if (!localReservationContent) return;
+    const nuevosHorarios = localReservationContent.horarios_comida.filter((_, i) => i !== index);
+    setLocalReservationContent(prev => prev ? { ...prev, horarios_comida: nuevosHorarios } : null);
+    setHasUnsavedChanges(true);
+  };
+
+  const handleLocalRemoveHorarioCena = (index: number) => {
+    if (!localReservationContent) return;
+    const nuevosHorarios = localReservationContent.horarios_cena.filter((_, i) => i !== index);
+    setLocalReservationContent(prev => prev ? { ...prev, horarios_cena: nuevosHorarios } : null);
+    setHasUnsavedChanges(true);
   };
 
   const diasSemana = [
@@ -262,11 +375,39 @@ export default function Configuracion() {
 
   const handleSaveAll = async () => {
     try {
+      const promises = [];
+
+      // Guardar configuración del restaurante si hay cambios
+      if (localConfig && JSON.stringify(localConfig) !== JSON.stringify(config)) {
+        promises.push(updateConfig(localConfig));
+      }
+
+      // Guardar horarios públicos si hay cambios
+      if (JSON.stringify(localHorariosPublicos) !== JSON.stringify(horariosPublicos)) {
+        promises.push(updateHorariosPublicos(localHorariosPublicos));
+      }
+
+      // Guardar footer si hay cambios
+      if (localFooterInfo && JSON.stringify(localFooterInfo) !== JSON.stringify(footerInfo)) {
+        promises.push(updateFooterInfo(localFooterInfo));
+      }
+
+      // Guardar contenido de reservas si hay cambios
+      if (localReservationContent && JSON.stringify(localReservationContent) !== JSON.stringify(reservationContent)) {
+        promises.push(updateReservationContent(localReservationContent));
+      }
+
+      // Ejecutar todas las actualizaciones en paralelo
+      await Promise.all(promises);
+
+      setHasUnsavedChanges(false);
+      
       toast({
         title: "Configuración guardada",
         description: "Todos los cambios han sido guardados correctamente.",
       });
     } catch (error) {
+      console.error('Error saving configuration:', error);
       toast({
         title: "Error",
         description: "No se pudieron guardar los cambios.",
@@ -298,8 +439,13 @@ export default function Configuracion() {
         <div className="p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="ios-text-large-title font-bold text-enigma-neutral-900">
+              <h1 className="ios-text-large-title font-bold text-enigma-neutral-900 flex items-center gap-2">
                 Configuración
+                {hasUnsavedChanges && (
+                  <span className="text-xs bg-orange-100 text-orange-700 px-2 py-1 rounded-full font-medium">
+                    Cambios sin guardar
+                  </span>
+                )}
               </h1>
               <p className="ios-text-footnote text-enigma-neutral-600 mt-1">
                 Sistema Enigma • {currentTime.toLocaleTimeString('es-ES')}
@@ -321,14 +467,17 @@ export default function Configuracion() {
               <IOSButton 
                 variant="primary"
                 onClick={handleSaveAll}
-                className="text-white shadow-ios"
+                className="text-white shadow-ios relative"
                 style={{ 
-                  backgroundColor: '#237584',
-                  borderColor: '#237584'
+                  backgroundColor: hasUnsavedChanges ? '#CB5910' : '#237584',
+                  borderColor: hasUnsavedChanges ? '#CB5910' : '#237584'
                 }}
               >
+                {hasUnsavedChanges && (
+                  <div className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+                )}
                 <Save size={20} className="mr-2" />
-                Guardar
+                {hasUnsavedChanges ? 'Guardar Cambios' : 'Guardar'}
               </IOSButton>
             </div>
           </div>
@@ -380,61 +529,162 @@ export default function Configuracion() {
             isExpanded={expandedSections.restaurant}
             onToggle={() => toggleExpanded('restaurant')}
           >
-            {config && (
+            {localConfig && (
               <div className="space-y-0">
                 <SettingRow
                   label="Nombre del Restaurante"
                   description="Nombre que aparecerá en las reservas"
-                  value={config.nombre_restaurante}
+                  value={localConfig.nombre_restaurante}
                   icon={Store}
-                  onChange={(value) => updateConfig({ nombre_restaurante: value })}
+                  onChange={(value) => handleLocalConfigChange({ nombre_restaurante: value })}
                 />
                 <SettingRow
                   label="Dirección"
                   description="Dirección completa del establecimiento"
-                  value={config.direccion}
+                  value={localConfig.direccion}
                   icon={MapPin}
-                  onChange={(value) => updateConfig({ direccion: value })}
+                  onChange={(value) => handleLocalConfigChange({ direccion: value })}
                 />
                 <SettingRow
                   label="Teléfono"
                   description="Número de contacto principal"
-                  value={config.telefono}
+                  value={localConfig.telefono}
                   icon={Phone}
-                  onChange={(value) => updateConfig({ telefono: value })}
+                  onChange={(value) => handleLocalConfigChange({ telefono: value })}
                 />
                 <SettingRow
                   label="Email de Reservas"
                   description="Correo electrónico para notificaciones"
-                  value={config.email_reservas}
+                  value={localConfig.email}
                   icon={Mail}
-                  onChange={(value) => updateConfig({ email_reservas: value })}
+                  onChange={(value) => handleLocalConfigChange({ email: value })}
                 />
                 <SettingRow
-                  label="Capacidad Máxima"
-                  description="Número máximo de comensales simultáneos"
-                  value={config.capacidad_maxima}
-                  type="number"
-                  icon={Users}
-                  onChange={(value) => updateConfig({ capacidad_maxima: value })}
+                  label="URL del Mapa"
+                  description="Enlace a Google Maps o ubicación"
+                  value={localConfig.mapa_url || ''}
+                  icon={MapPin}
+                  onChange={(value) => handleLocalConfigChange({ mapa_url: value })}
                 />
                 <SettingRow
-                  label="Duración Reserva Estándar"
-                  description="Tiempo por defecto de cada reserva en minutos"
-                  value={config.duracion_reserva_default_minutos}
-                  type="number"
-                  icon={Clock}
-                  onChange={(value) => updateConfig({ duracion_reserva_default_minutos: value })}
+                  label="Texto Adicional"
+                  description="Información extra del restaurante"
+                  value={localConfig.texto_adicional || ''}
+                  icon={MessageSquare}
+                  onChange={(value) => handleLocalConfigChange({ texto_adicional: value })}
+                />
+              </div>
+            )}
+          </ConfigurationSection>
+
+          {/* Configuración del Footer Web */}
+          <ConfigurationSection
+            title="Configuración del Footer Web"
+            description="Gestiona la información que aparece en el footer de la página web"
+            icon={Globe}
+            isExpanded={expandedSections.footer}
+            onToggle={() => toggleExpanded('footer')}
+            color="#CB5910"
+          >
+            {footerLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-6 h-6 animate-spin text-enigma-primary" />
+                <span className="ml-2 text-enigma-neutral-600">Cargando configuración del footer...</span>
+              </div>
+            ) : localFooterInfo ? (
+              <div className="space-y-4">
+                <SettingRow
+                  label="Descripción del Restaurante"
+                  description="Descripción que aparece en el footer web"
+                  value={localFooterInfo.descripcion_restaurante || ''}
+                  icon={MessageSquare}
+                  onChange={(value) => handleLocalFooterChange({ descripcion_restaurante: value })}
                 />
                 <SettingRow
-                  label="Auto Aceptar Reservas"
-                  description="Confirmar automáticamente nuevas reservas"
-                  value={config.auto_aceptar_reservas}
-                  type="toggle"
-                  icon={CheckCircle}
-                  color="#9FB289"
-                  onChange={(value) => updateConfig({ auto_aceptar_reservas: value })}
+                  label="Dirección"
+                  description="Dirección física del restaurante"
+                  value={localFooterInfo.direccion}
+                  icon={MapPin}
+                  onChange={(value) => handleLocalFooterChange({ direccion: value })}
                 />
+                <SettingRow
+                  label="Teléfono"
+                  description="Teléfono de contacto"
+                  value={localFooterInfo.telefono}
+                  icon={Phone}
+                  onChange={(value) => handleLocalFooterChange({ telefono: value })}
+                />
+                <SettingRow
+                  label="Email"
+                  description="Email de contacto"
+                  value={localFooterInfo.email}
+                  icon={Mail}
+                  onChange={(value) => handleLocalFooterChange({ email: value })}
+                />
+                <SettingRow
+                  label="Instagram URL"
+                  description="Enlace a perfil de Instagram"
+                  value={localFooterInfo.instagram_url}
+                  icon={Instagram}
+                  color="#E4405F"
+                  onChange={(value) => handleLocalFooterChange({ instagram_url: value })}
+                />
+                <SettingRow
+                  label="TripAdvisor URL"
+                  description="Enlace a página de TripAdvisor"
+                  value={localFooterInfo.tripadvisor_url}
+                  icon={ExternalLink}
+                  color="#00AA6C"
+                  onChange={(value) => handleLocalFooterChange({ tripadvisor_url: value })}
+                />
+                <SettingRow
+                  label="Google Maps URL"
+                  description="Enlace a ubicación en Google Maps"
+                  value={localFooterInfo.google_maps_url}
+                  icon={Navigation}
+                  color="#4285F4"
+                  onChange={(value) => handleLocalFooterChange({ google_maps_url: value })}
+                />
+                <SettingRow
+                  label="WhatsApp URL"
+                  description="Enlace directo de WhatsApp (opcional)"
+                  value={localFooterInfo.whatsapp_url || ''}
+                  icon={Smartphone}
+                  color="#25D366"
+                  onChange={(value) => handleLocalFooterChange({ whatsapp_url: value })}
+                />
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <div className="mb-4">
+                  <Globe className="w-12 h-12 mx-auto text-enigma-neutral-400 mb-3" />
+                  <h4 className="ios-text-headline font-semibold text-enigma-neutral-700 mb-2">
+                    No hay configuración de footer
+                  </h4>
+                  <p className="ios-text-body text-enigma-neutral-600">
+                    Configure la información que aparecerá en el footer de su página web
+                  </p>
+                </div>
+                <IOSButton 
+                  variant="primary"
+                  onClick={() => createFooterInfo({
+                    descripcion_restaurante: '',
+                    direccion: '',
+                    telefono: '',
+                    email: '',
+                    instagram_url: '',
+                    tripadvisor_url: '',
+                    google_maps_url: ''
+                  })}
+                  className="text-white shadow-ios"
+                  style={{ 
+                    backgroundColor: '#CB5910',
+                    borderColor: '#CB5910'
+                  }}
+                >
+                  <Plus size={20} className="mr-2" />
+                  Crear Configuración del Footer
+                </IOSButton>
               </div>
             )}
           </ConfigurationSection>
@@ -541,29 +791,292 @@ export default function Configuracion() {
           {/* Horarios de Operación */}
           <ConfigurationSection
             title="Horarios de Operación"
-            description="Días y horarios de apertura"
+            description="Gestión completa de horarios de atención y reservas"
             icon={Clock}
             isExpanded={expandedSections.schedule}
             onToggle={() => toggleExpanded('schedule')}
           >
-            <div className="space-y-0">
-              {horarios.map((horario) => (
-                <SettingRow
-                  key={horario.id}
-                  label={diasSemana[horario.dia_semana]}
-                  description={
-                    horario.activo 
-                      ? `${horario.hora_apertura} - ${horario.hora_cierre} (${horario.tipo_servicio})`
-                      : 'Cerrado'
-                  }
-                  value={horario.activo}
-                  type="toggle"
-                  icon={Clock}
-                  color="#237584"
-                  onChange={(activo) => updateHorario(horario.id, { activo })}
-                />
-              ))}
-            </div>
+            {reservationLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <RefreshCw className="w-6 h-6 animate-spin text-enigma-primary" />
+                <span className="ml-2 text-enigma-neutral-600">Cargando configuración de horarios...</span>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                
+                {/* Horarios Públicos de Atención (tabla contacto) */}
+                <div>
+                  <h4 className="ios-text-headline font-semibold text-enigma-neutral-900 mb-4 flex items-center gap-2">
+                    <Store size={20} className="text-enigma-primary" />
+                    Horarios Públicos de Atención
+                  </h4>
+                  <p className="ios-text-footnote text-enigma-neutral-600 mb-4">
+                    Horarios que se muestran al público en la información del restaurante
+                  </p>
+                  
+                  <div className="bg-white rounded-ios-lg border border-enigma-neutral-200 p-4">
+                    <div className="space-y-3 mb-4">
+                      {localHorariosPublicos.map((horario, index) => (
+                        <div 
+                          key={`horario-publico-${index}`}
+                          className="flex items-center gap-3 p-3 bg-enigma-neutral-50 rounded-ios"
+                        >
+                          <Store size={16} className="text-enigma-primary flex-shrink-0" />
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Input
+                              value={horario.days}
+                              onChange={(e) => handleLocalHorarioPublicoChange(index, { days: e.target.value })}
+                              placeholder="Ej: Lunes a Viernes"
+                              className="text-sm font-medium"
+                            />
+                            <Input
+                              value={horario.hours}
+                              onChange={(e) => handleLocalHorarioPublicoChange(index, { hours: e.target.value })}
+                              placeholder="Ej: 13:00 - 16:00 | 18:30 - 23:00"
+                              className="text-sm"
+                            />
+                          </div>
+                          <button
+                            onClick={() => handleLocalRemoveHorarioPublico(index)}
+                            className="text-red-500 hover:text-red-700 p-1"
+                          >
+                            <X size={16} />
+                          </button>
+                        </div>
+                      ))}
+                      {localHorariosPublicos.length === 0 && (
+                        <div className="text-center py-4 text-enigma-neutral-500 ios-text-footnote">
+                          No hay horarios públicos configurados
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Agregar nuevo horario público */}
+                    <div className="border-t border-enigma-neutral-200 pt-4">
+                      <div className="flex gap-3 mb-3">
+                        <Input
+                          value={newPublicSchedule.days}
+                          onChange={(e) => setNewPublicSchedule(prev => ({ ...prev, days: e.target.value }))}
+                          placeholder="Días (ej: Lunes a Viernes)"
+                          className="flex-1"
+                        />
+                        <Input
+                          value={newPublicSchedule.hours}
+                          onChange={(e) => setNewPublicSchedule(prev => ({ ...prev, hours: e.target.value }))}
+                          placeholder="Horarios (ej: 13:00 - 16:00 | 18:30 - 23:00)"
+                          className="flex-1"
+                        />
+                      </div>
+                      <button
+                        onClick={() => {
+                          if (newPublicSchedule.days && newPublicSchedule.hours) {
+                            handleLocalAddHorarioPublico(newPublicSchedule.days, newPublicSchedule.hours);
+                            setNewPublicSchedule({ days: '', hours: '' });
+                          }
+                        }}
+                        disabled={!newPublicSchedule.days || !newPublicSchedule.hours}
+                        className="w-full px-4 py-3 rounded-ios font-medium text-sm transition-all duration-200 flex items-center justify-center gap-2 ios-touch-feedback disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ 
+                          backgroundColor: !newPublicSchedule.days || !newPublicSchedule.hours ? '#e2e8f0' : '#237584',
+                          color: !newPublicSchedule.days || !newPublicSchedule.hours ? '#64748b' : 'white',
+                          border: `1px solid ${!newPublicSchedule.days || !newPublicSchedule.hours ? '#e2e8f0' : '#237584'}`,
+                          boxShadow: !newPublicSchedule.days || !newPublicSchedule.hours ? 'none' : '0 2px 8px rgba(35, 117, 132, 0.15)'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!(!newPublicSchedule.days || !newPublicSchedule.hours)) {
+                            e.currentTarget.style.backgroundColor = '#1e6a75';
+                            e.currentTarget.style.borderColor = '#1e6a75';
+                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(35, 117, 132, 0.25)';
+                            e.currentTarget.style.transform = 'translateY(-1px)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!(!newPublicSchedule.days || !newPublicSchedule.hours)) {
+                            e.currentTarget.style.backgroundColor = '#237584';
+                            e.currentTarget.style.borderColor = '#237584';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(35, 117, 132, 0.15)';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                          }
+                        }}
+                      >
+                        <Plus size={16} />
+                        Agregar Horario Público
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Horarios de Reservas (tabla contenido_reservas) */}
+                {localReservationContent ? (
+                  <div className="space-y-6">
+                    
+                    {/* Horarios de Comida */}
+                    <div>
+                      <h4 className="ios-text-headline font-semibold text-enigma-neutral-900 mb-4 flex items-center gap-2">
+                        <Coffee size={20} style={{ color: '#CB5910' }} />
+                        Horarios Disponibles - Comida
+                      </h4>
+                      <p className="ios-text-footnote text-enigma-neutral-600 mb-4">
+                        Horarios que aparecen en el formulario de reservas para servicio de comida
+                      </p>
+                      
+                      <div className="bg-white rounded-ios-lg border border-enigma-neutral-200 p-4">
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {localReservationContent.horarios_comida?.map((horario, index) => (
+                            <div 
+                              key={`comida-${index}`}
+                              className="flex items-center gap-2 bg-orange-50 text-orange-700 px-3 py-2 rounded-ios text-sm font-medium"
+                            >
+                              <Coffee size={14} />
+                              {horario}
+                              <button
+                                onClick={() => handleLocalRemoveHorarioComida(index)}
+                                className="ml-1 text-orange-500 hover:text-orange-700"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                          {(!localReservationContent.horarios_comida || localReservationContent.horarios_comida.length === 0) && (
+                            <span className="text-enigma-neutral-500 ios-text-footnote">No hay horarios configurados</span>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Input
+                            id="horario-comida-input"
+                            type="time"
+                            placeholder="Nuevo horario"
+                            className="flex-1"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                const target = e.target as HTMLInputElement;
+                                if (target.value) {
+                                  handleLocalAddHorarioComida(target.value);
+                                  target.value = '';
+                                }
+                              }
+                            }}
+                          />
+                          <IOSButton
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const input = document.getElementById('horario-comida-input') as HTMLInputElement;
+                              if (input?.value) {
+                                handleLocalAddHorarioComida(input.value);
+                                input.value = '';
+                              }
+                            }}
+                            style={{ borderColor: '#CB5910', color: '#CB5910' }}
+                          >
+                            <Plus size={16} />
+                          </IOSButton>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Horarios de Cena */}
+                    <div>
+                      <h4 className="ios-text-headline font-semibold text-enigma-neutral-900 mb-4 flex items-center gap-2">
+                        <Moon size={20} style={{ color: '#237584' }} />
+                        Horarios Disponibles - Cena
+                      </h4>
+                      <p className="ios-text-footnote text-enigma-neutral-600 mb-4">
+                        Horarios que aparecen en el formulario de reservas para servicio de cena
+                      </p>
+                      
+                      <div className="bg-white rounded-ios-lg border border-enigma-neutral-200 p-4">
+                        <div className="flex flex-wrap gap-2 mb-4">
+                          {localReservationContent.horarios_cena?.map((horario, index) => (
+                            <div 
+                              key={`cena-${index}`}
+                              className="flex items-center gap-2 bg-blue-50 text-blue-700 px-3 py-2 rounded-ios text-sm font-medium"
+                            >
+                              <Moon size={14} />
+                              {horario}
+                              <button
+                                onClick={() => handleLocalRemoveHorarioCena(index)}
+                                className="ml-1 text-blue-500 hover:text-blue-700"
+                              >
+                                <X size={14} />
+                              </button>
+                            </div>
+                          ))}
+                          {(!localReservationContent.horarios_cena || localReservationContent.horarios_cena.length === 0) && (
+                            <span className="text-enigma-neutral-500 ios-text-footnote">No hay horarios configurados</span>
+                          )}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Input
+                            id="horario-cena-input"
+                            type="time"
+                            placeholder="Nuevo horario"
+                            className="flex-1"
+                            onKeyPress={(e) => {
+                              if (e.key === 'Enter') {
+                                const target = e.target as HTMLInputElement;
+                                if (target.value) {
+                                  handleLocalAddHorarioCena(target.value);
+                                  target.value = '';
+                                }
+                              }
+                            }}
+                          />
+                          <IOSButton
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const input = document.getElementById('horario-cena-input') as HTMLInputElement;
+                              if (input?.value) {
+                                handleLocalAddHorarioCena(input.value);
+                                input.value = '';
+                              }
+                            }}
+                            style={{ borderColor: '#237584', color: '#237584' }}
+                          >
+                            <Plus size={16} />
+                          </IOSButton>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="mb-4">
+                      <Clock className="w-12 h-12 mx-auto text-enigma-neutral-400 mb-3" />
+                      <h4 className="ios-text-headline font-semibold text-enigma-neutral-700 mb-2">
+                        No hay configuración de horarios de reserva
+                      </h4>
+                      <p className="ios-text-body text-enigma-neutral-600">
+                        Configure los horarios disponibles para el formulario de reservas
+                      </p>
+                    </div>
+                    <IOSButton 
+                      variant="primary"
+                      onClick={() => createReservationContent({
+                        titulo_principal: 'Reserva tu mesa',
+                        descripcion_principal: 'Disfruta de nuestra experiencia gastronómica',
+                        mensaje_confirmacion: 'Tu reserva ha sido confirmada',
+                        mensaje_whatsapp: 'Hola, me gustaría hacer una reserva',
+                        horarios_comida: [],
+                        horarios_cena: [],
+                        ocasion_opciones: []
+                      })}
+                      className="text-white shadow-ios"
+                      style={{ 
+                        backgroundColor: '#237584',
+                        borderColor: '#237584'
+                      }}
+                    >
+                      <Plus size={20} className="mr-2" />
+                      Crear Configuración de Horarios
+                    </IOSButton>
+                  </div>
+                )}
+              </div>
+            )}
           </ConfigurationSection>
 
           {/* Configuración de Notificaciones */}

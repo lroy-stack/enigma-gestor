@@ -1,21 +1,163 @@
 // Definiciones de tipos TypeScript para las entidades principales de Enigma Cocina con Alma
 
+// Interfaz actualizada para la tabla 'contacts' (clientes)
 export interface Cliente {
-  id: string;
-  nombre: string;
-  apellido: string;
-  email: string;
-  telefono: string;
-  idioma_preferido: string;
-  historial_reservas_ids?: string[];
-  preferencias_dieteticas?: string[];
-  notas_privadas?: string;
-  vip_status: boolean;
-  fecha_creacion: string;
-  ultima_visita?: string;
+  id: string; // uuid
+  name: string; // Nombre
+  last_name: string; // Apellido
+  email: string; // Email
+  phone: string; // Teléfono
+  fecha_nacimiento?: string; // date - Fecha de nacimiento
+  empresa?: string; // varchar - Empresa
+  direccion?: string; // text - Dirección
+  codigo_postal?: string; // varchar - Código postal
+  ciudad?: string; // varchar - Ciudad
+  pais?: string; // varchar - País
+  idioma_preferido?: string; // varchar - Idioma: 'es'
+  vip_status?: boolean; // boolean - Estado VIP
+  preferencias_comida?: string; // text - Preferencias alimentarias
+  restricciones_dieteticas?: string; // text - Restricciones dietéticas
+  notas_internas?: string; // text - Notas internas
+  fecha_ultima_visita?: string; // date - Última visita
+  total_visitas?: number; // integer - Total de visitas
+  gasto_promedio?: number; // numeric - Gasto promedio
+  gasto_total?: number; // numeric - Gasto total
+  calificacion_promedio?: number; // numeric - Calificación promedio
+  consentimiento_marketing?: boolean; // boolean - Acepta marketing
+  created_at?: string;
+  updated_at?: string;
 }
 
+// Interfaz para notas de clientes
+export interface ClienteNota {
+  id: string; // uuid
+  cliente_id: string; // uuid - Referencia al cliente
+  nota: string; // text - Texto de la nota
+  tipo?: string; // varchar - Tipo: 'general'
+  es_importante?: boolean; // boolean - Si es importante
+  created_by?: string; // uuid - Quién la creó
+  created_at?: string;
+  updated_at?: string;
+}
+
+// Interfaz para etiquetas de clientes
+export interface ClienteTag {
+  id: string; // uuid
+  cliente_id: string; // uuid - Referencia al cliente
+  tag: string; // varchar - Etiqueta
+  color?: string; // varchar - Color: '#3B82F6'
+  created_by?: string; // uuid - Quién la creó
+  created_at?: string;
+}
+
+// Interfaz para alertas de clientes
+export interface ClienteAlerta {
+  id: string; // uuid
+  cliente_id: string; // uuid - Referencia al cliente
+  tipo_alerta: string; // varchar - Tipo de alerta
+  mensaje: string; // text - Mensaje
+  severidad?: string; // varchar - Severidad: 'media'
+  activa?: boolean; // boolean - Si está activa
+  fecha_inicio?: string; // date - Fecha inicio
+  fecha_fin?: string; // date - Fecha fin
+  created_by?: string; // uuid - Quién la creó
+  created_at?: string;
+}
+
+// Interfaz para analíticas de clientes
+export interface ClienteAnalytica {
+  id: string; // uuid
+  cliente_id: string; // uuid - Referencia al cliente
+  mes: string; // date - Mes
+  visitas_mes?: number; // integer - Visitas del mes
+  gasto_mes?: number; // numeric - Gasto del mes
+  reservas_canceladas?: number; // integer - Reservas canceladas
+  puntuacion_promedio?: number; // numeric - Puntuación promedio
+  created_at?: string;
+}
+
+// Interfaz para interacciones con clientes
+export interface ClienteInteraccion {
+  id: string; // uuid
+  cliente_id: string; // uuid - Referencia al cliente
+  tipo_interaccion: string; // varchar - Tipo de interacción
+  fecha_interaccion: string; // timestamp - Fecha
+  descripcion?: string; // text - Descripción
+  resultado?: string; // varchar - Resultado
+  personal_id?: string; // uuid - Personal que atendió
+  created_at?: string;
+}
+
+// Interfaces para métricas y analíticas
+export interface ReservaMetricaDiaria {
+  id: string; // uuid
+  fecha: string; // date
+  total_reservas?: number; // integer
+  reservas_confirmadas?: number; // integer
+  reservas_canceladas?: number; // integer
+  reservas_no_show?: number; // integer
+  total_comensales?: number; // integer
+  tasa_ocupacion?: number; // numeric
+  ingreso_promedio?: number; // numeric
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface ReservaMetricaHoraria {
+  id: string; // uuid
+  fecha: string; // date
+  hora: number; // integer
+  total_reservas?: number; // integer
+  total_comensales?: number; // integer
+  mesas_ocupadas?: number; // integer
+  created_at?: string;
+}
+
+export interface ReservaMetricaCanal {
+  id: string; // uuid
+  fecha: string; // date
+  canal: string; // varchar - Canal de reserva
+  total_reservas?: number; // integer
+  tasa_conversion?: number; // numeric
+  created_at?: string;
+}
+
+// Interfaz actualizada para la tabla 'reservas' (canal web)
 export interface Reserva {
+  id: string; // uuid
+  nombre: string; // Nombre del cliente
+  email: string; // Email
+  telefono: string; // Teléfono
+  fecha_reserva: string; // date - Fecha
+  hora_reserva: string; // text - Hora
+  personas: number; // integer - Número de personas
+  ocasion?: string; // text - Ocasión especial
+  preferencia_mesa?: string; // text - Preferencia de mesa
+  requisitos_dieteticos?: string; // text - Requisitos dietéticos
+  notas?: string; // text - Notas
+  estado: string; // text - Estado: 'pendiente', 'confirmada', 'cancelada', etc.
+  primera_visita?: boolean; // boolean - Si es primera visita
+  created_at?: string; // timestamp
+  updated_at?: string; // timestamp
+}
+
+// Interfaz para el formulario de reservas
+export interface ReservaFormData {
+  nombre: string;
+  email: string;
+  telefono: string;
+  fecha_reserva: string;
+  hora_reserva: string;
+  personas: number;
+  ocasion?: string;
+  preferencia_mesa?: string;
+  requisitos_dieteticos?: string;
+  notas?: string;
+  primera_visita?: boolean;
+}
+
+// Mantener la interfaz anterior para compatibilidad (si se necesita)
+export interface ReservaLegacy {
   id: string;
   cliente_id: string;
   fecha_reserva: string;

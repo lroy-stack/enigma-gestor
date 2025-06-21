@@ -33,14 +33,14 @@ export function useCustomersEnhanced(filters?: CustomerFilters) {
     queryKey: ['customers-enhanced', filters],
     queryFn: async () => {
       let query = supabase
-        .from('clientes')
+        .from('contacts')
         .select('*');
 
       // Aplicar filtros
       if (filters?.searchTerm) {
         const term = `%${filters.searchTerm.toLowerCase()}%`;
         query = query.or(
-          `nombre.ilike.${term},apellido.ilike.${term},email.ilike.${term},telefono.ilike.${term}`
+          `name.ilike.${term},last_name.ilike.${term},email.ilike.${term},phone.ilike.${term}`
         );
       }
 
@@ -54,7 +54,7 @@ export function useCustomersEnhanced(filters?: CustomerFilters) {
             break;
           case 'nuevos':
             const mesAnterior = new Date(ahora.getFullYear(), ahora.getMonth() - 1, ahora.getDate());
-            query = query.gte('fecha_creacion', mesAnterior.toISOString());
+            query = query.gte('created_at', mesAnterior.toISOString());
             break;
           case 'activos':
             const tresMesesAntes = new Date(ahora.getFullYear(), ahora.getMonth() - 3, ahora.getDate());
@@ -69,18 +69,18 @@ export function useCustomersEnhanced(filters?: CustomerFilters) {
 
       // Filtro por preferencias dietéticas
       if (filters?.hasPreferences) {
-        query = query.not('preferencias_dieteticas', 'is', null);
+        query = query.not('dietary_restrictions', 'is', null);
       }
 
       // Rango de fechas
       if (filters?.dateRange) {
         query = query
-          .gte('fecha_creacion', filters.dateRange.start.toISOString())
-          .lte('fecha_creacion', filters.dateRange.end.toISOString());
+          .gte('created_at', filters.dateRange.start.toISOString())
+          .lte('created_at', filters.dateRange.end.toISOString());
       }
 
       // Ordenamiento
-      const sortBy = filters?.sortBy || 'fecha_creacion';
+      const sortBy = filters?.sortBy === 'fecha_creacion' ? 'created_at' : filters?.sortBy === 'nombre' ? 'name' : filters?.sortBy || 'created_at';
       const sortOrder = filters?.sortOrder || 'desc';
       query = query.order(sortBy, { ascending: sortOrder === 'asc' });
 
@@ -106,7 +106,7 @@ export function useCustomerStats() {
     queryKey: ['customer-stats'],
     queryFn: async () => {
       const { data: clientes, error } = await supabase
-        .from('clientes')
+        .from('contacts')
         .select('*');
       
       if (error) throw error;
@@ -117,7 +117,7 @@ export function useCustomerStats() {
       
       const stats: CustomerStats = {
         total: clientes.length,
-        nuevos: clientes.filter(c => new Date(c.fecha_creacion) > mesAnterior).length,
+        nuevos: clientes.filter(c => new Date(c.created_at) > mesAnterior).length,
         vip: clientes.filter(c => c.vip_status).length,
         activos: clientes.filter(c => c.ultima_visita && new Date(c.ultima_visita) > tresMesesAntes).length,
         inactivos: clientes.filter(c => !c.ultima_visita || new Date(c.ultima_visita) < tresMesesAntes).length,
@@ -135,20 +135,15 @@ export function useCustomerDetails(id: string) {
     queryKey: ['customer-details', id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('clientes')
+        .from('contacts')
         .select(`
-          *,
-          reservas (
-            id,
-            fecha_reserva,
-            hora_reserva,
-            numero_comensales,
-            estado_reserva,
-            origen_reserva
-          )
+          *
         `)
         .eq('id', id)
         .single();
+      
+      // Note: reservas table doesn't have direct relationship with contacts
+      // Would need to fetch reservas separately by email/phone matching
       
       if (error) throw error;
       return data;
@@ -164,7 +159,7 @@ export function useUpdateCustomer() {
   return useMutation({
     mutationFn: async ({ id, ...updates }: Partial<Cliente> & { id: string }) => {
       const { data, error } = await supabase
-        .from('clientes')
+        .from('contacts')
         .update(updates)
         .eq('id', id)
         .select()
@@ -187,7 +182,7 @@ export function useToggleVIPStatus() {
   return useMutation({
     mutationFn: async ({ id, vipStatus }: { id: string; vipStatus: boolean }) => {
       const { data, error } = await supabase
-        .from('clientes')
+        .from('contacts')
         .update({ vip_status: vipStatus })
         .eq('id', id)
         .select()
@@ -210,7 +205,7 @@ export function useDeleteCustomer() {
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('clientes')
+        .from('contacts')
         .delete()
         .eq('id', id);
       
@@ -241,7 +236,7 @@ export function useBulkCustomerActions() {
       switch (action) {
         case 'toggleVIP':
           const { error: vipError } = await supabase
-            .from('clientes')
+            .from('contacts')
             .update({ vip_status: value })
             .in('id', customerIds);
           if (vipError) throw vipError;
@@ -249,7 +244,7 @@ export function useBulkCustomerActions() {
           
         case 'delete':
           const { error: deleteError } = await supabase
-            .from('clientes')
+            .from('contacts')
             .delete()
             .in('id', customerIds);
           if (deleteError) throw deleteError;

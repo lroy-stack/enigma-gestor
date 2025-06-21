@@ -1,18 +1,20 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npm run build:*)",
-      "Bash(npm run typecheck:*)",
-      "Bash(mv:*)",
-      "Bash(npm run dev:*)",
-      "Bash(npm run:*)",
+      "Bash(npm i:*)",
+      "Bash(sudo npm i -g @anthropic-ai/claude-code)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "Bash(# Create a temporary script to analyze component usage\ncat > /tmp/analyze_components.sh << 'EOF'\n#!/bin/bash\n\necho \"=== COMPONENT USAGE ANALYSIS ===\"\necho\n\n# Get all component files\necho \"All component files found:\"\nfind src/components -name \"*.tsx\" -o -name \"*.ts\" | sort\n\necho\necho \"=== CHECKING COMPONENT IMPORTS AND USAGE ===\"\necho\n\n# For each component file, check if it's imported anywhere\nfor component_file in $(find src/components -name \"*.tsx\" -o -name \"*.ts\" | sort); do\n    # Extract component name from file path\n    component_name=$(basename \"$component_file\" | sed 's/\\.(tsx|ts)$//')\n    \n    # Skip UI components for now (they're heavily used)\n    if [[ \"$component_file\" == *\"/ui/\"* ]]; then\n        continue\n    fi\n    \n    echo \"--- $component_name ---\"\n    echo \"File: $component_file\"\n    \n    # Check for imports of this component\n    import_count=$(rg \"import.*$component_name\" src/ -c | awk -F: '{sum += $2} END {print sum+0}')\n    echo \"Import count: $import_count\"\n    \n    # Check for JSX usage\n    jsx_count=$(rg \"<$component_name\" src/ -c | awk -F: '{sum += $2} END {print sum+0}')\n    echo \"JSX usage count: $jsx_count\"\n    \n    if [ \"$import_count\" -eq 0 ] && [ \"$jsx_count\" -eq 0 ]; then\n        echo \"*** POTENTIALLY UNUSED ***\"\n    fi\n    \n    echo\ndone\nEOF\n\nchmod +x /tmp/analyze_components.sh\n/tmp/analyze_components.sh)",
+      "Bash(# Let's check actual imports more carefully\necho \"=== CHECKING ACTUAL COMPONENT USAGE ===\"\necho\n\n# Check imports for RestaurantAnalytics as an example\necho \"RestaurantAnalytics usage:\"\nrg \"RestaurantAnalytics\" src/ --type typescript\necho\n\necho \"LoginForm usage:\"\nrg \"LoginForm\" src/ --type typescript\necho\n\necho \"MainLayout usage:\"\nrg \"MainLayout\" src/ --type typescript\necho\n\necho \"EnhancedIOSDashboard usage:\"\nrg \"EnhancedIOSDashboard\" src/ --type typescript\necho\n\necho \"ModernTableGrid usage:\"\nrg \"ModernTableGrid\" src/ --type typescript\necho)",
+      "Bash(# Create a more accurate analysis script\ncat > /tmp/detailed_analysis.sh << 'EOF'\n#!/bin/bash\n\necho \"=== COMPREHENSIVE COMPONENT USAGE ANALYSIS ===\"\necho\n\n# Get all component files (excluding UI components initially)\ncomponents=$(find src/components -name \"*.tsx\" | grep -v \"/ui/\" | sort)\n\nused_components=()\nunused_components=()\nused_but_not_imported=()\n\nfor component_file in $components; do\n    # Extract component name from file\n    component_name=$(basename \"$component_file\" .tsx)\n    \n    # Check for imports\n    import_results=$(rg \"import.*$component_name\" src/ 2>/dev/null || true)\n    \n    # Check for JSX usage (sometimes components are used without named imports)\n    jsx_results=$(rg \"<$component_name\" src/ 2>/dev/null || true)\n    \n    # Check for default export usage patterns\n    default_import_results=$(rg \"import $component_name\" src/ 2>/dev/null || true)\n    \n    echo \"--- $component_name ---\"\n    echo \"File: $component_file\"\n    \n    total_usage=\"\"\n    if [[ -n \"$import_results\" ]]; then\n        total_usage=\"$total_usage IMPORTS\"\n    fi\n    if [[ -n \"$jsx_results\" ]]; then\n        total_usage=\"$total_usage JSX\"\n    fi\n    if [[ -n \"$default_import_results\" ]]; then\n        total_usage=\"$total_usage DEFAULT_IMPORT\"\n    fi\n    \n    if [[ -n \"$total_usage\" ]]; then\n        echo \"Usage found: $total_usage\"\n        used_components+=(\"$component_name\")\n        echo \"Import locations:\"\n        echo \"$import_results$default_import_results\" | grep -v \"^$component_file:\" | head -3\n    else\n        echo \"*** NO USAGE FOUND ***\"\n        unused_components+=(\"$component_name\")\n    fi\n    echo\ndone\n\necho \"=== SUMMARY ===\"\necho \"Total components analyzed: $(echo \"$components\" | wc -l)\"\necho \"Used components: ${#used_components[@]}\"\necho \"Unused components: ${#unused_components[@]}\"\necho\necho \"=== UNUSED COMPONENTS ===\"\nfor comp in \"${unused_components[@]}\"; do\n    echo \"- $comp\"\ndone\n\nEOF\n\nchmod +x /tmp/detailed_analysis.sh\n/tmp/detailed_analysis.sh)",
+      "Bash(# Analyze table components specifically\necho \"=== TABLE COMPONENTS ANALYSIS ===\"\necho\necho \"All table-related components:\"\nfind src/components/tables -name \"*.tsx\" | sort\necho\necho \"=== TABLE COMPONENT DETAILS ===\"\n\n# Check each table component\nfor file in $(find src/components/tables -name \"*.tsx\" | sort); do\n    component_name=$(basename \"$file\" .tsx)\n    echo \"--- $component_name ---\"\n    \n    # Check first few lines to understand the component\n    echo \"Description/Purpose:\"\n    head -20 \"$file\" | grep -E \"^//|^\\*|interface|export.*function|export.*const|const.*=\" | head -3\n    \n    # Check usage\n    usage_count=$(rg \"$component_name\" src/ -c 2>/dev/null | awk -F: '{sum += $2} END {print sum+0}')\n    echo \"Total references: $usage_count\"\n    \n    # Check file size as indicator of complexity\n    lines=$(wc -l < \"$file\")\n    echo \"Lines of code: $lines\"\n    \n    echo\ndone)",
       "Bash(rm:*)",
+      "Bash(npm run lint)",
       "Bash(npx tsc:*)",
-      "Bash(ls:*)",
-      "Bash(grep:*)",
-      "Bash(pkill:*)",
-      "Bash(curl:*)",
-      "Bash(rg:*)"
+      "Bash(supabase status:*)",
+      "Bash(supabase start:*)",
+      "Bash(supabase db reset:*)"
     ],
     "deny": []
   }

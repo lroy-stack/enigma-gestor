@@ -7,6 +7,8 @@ import { IOSBadge } from '@/components/ui/ios-badge';
 import { useNotifications } from '@/hooks/useNotifications';
 import { NotificationList } from '@/components/notifications/NotificationList';
 import { NotificationModal } from '@/components/notifications/NotificationModal';
+import { NotificationDemo } from '@/components/notifications/NotificationDemo';
+import { NotificationIntegrationDemo } from '@/components/notifications/NotificationIntegrationDemo';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import type { Notification } from '@/hooks/useNotifications';
 
@@ -154,6 +156,12 @@ export default function Notificaciones() {
           </div>
         </div>
       </div>
+
+      {/* Demo de notificaciones */}
+      <NotificationDemo />
+
+      {/* Demo de integración de eventos */}
+      <NotificationIntegrationDemo />
 
       {/* Lista de notificaciones */}
       <div className="mb-6">

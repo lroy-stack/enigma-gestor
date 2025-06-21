@@ -10,21 +10,15 @@ export function useTodayReservations() {
       const { data, error } = await supabase
         .from('reservas')
         .select(`
-          *,
-          clientes (
-            id,
-            nombre,
-            apellido,
-            email,
-            telefono,
-            vip_status
-          ),
-          mesas (
-            id,
-            numero_mesa,
-            capacidad,
-            zona
-          )
+          id,
+          nombre,
+          email,
+          telefono,
+          fecha_reserva,
+          hora_reserva,
+          personas,
+          estado,
+          created_at
         `)
         .eq('fecha_reserva', today)
         .order('hora_reserva', { ascending: true });
@@ -34,17 +28,7 @@ export function useTodayReservations() {
         throw error;
       }
 
-      // Transformar los datos para incluir información del cliente
-      const transformedData = data?.map(reservation => ({
-        ...reservation,
-        cliente_nombre: reservation.clientes ? 
-          `${reservation.clientes.nombre} ${reservation.clientes.apellido}` : 
-          'Cliente',
-        numero_mesa: reservation.mesas?.numero_mesa || null,
-        telefono: reservation.clientes?.telefono || null,
-      })) || [];
-
-      return transformedData;
+      return data || [];
     },
     staleTime: 30 * 1000, // 30 segundos
     refetchInterval: 60 * 1000, // 1 minuto
@@ -55,7 +39,7 @@ export function useRestaurantStats() {
   return useQuery({
     queryKey: ['restaurant-stats'],
     queryFn: async () => {
-      // Get table states grouped by zone
+      // Get table states grouped by zone using correct table structure
       const { data: tableStates, error } = await supabase
         .from('mesas')
         .select(`
@@ -63,9 +47,7 @@ export function useRestaurantStats() {
           numero_mesa,
           capacidad,
           zona,
-          estados_mesa (
-            estado
-          )
+          activa
         `)
         .eq('activa', true);
 
@@ -76,8 +58,7 @@ export function useRestaurantStats() {
 
       // Group by zone and calculate stats
       const statsByZone = (tableStates || []).reduce((acc, table) => {
-        const zona = table.zona;
-        const estado = table.estados_mesa?.[0]?.estado || 'libre';
+        const zona = table.zona || 'Sin zona';
         
         if (!acc[zona]) {
           acc[zona] = {
@@ -92,24 +73,11 @@ export function useRestaurantStats() {
         }
 
         acc[zona].total_mesas++;
-        switch (estado) {
-          case 'libre':
-            acc[zona].mesas_libres++;
-            break;
-          case 'ocupada':
-            acc[zona].mesas_ocupadas++;
-            break;
-          case 'reservada':
-            acc[zona].mesas_reservadas++;
-            break;
-          case 'limpieza':
-            acc[zona].mesas_limpieza++;
-            break;
-        }
+        // Por ahora asumimos que todas las mesas están libres ya que no tenemos sistema de estados
+        acc[zona].mesas_libres++;
 
-        // Calculate occupation percentage
-        const occupied = acc[zona].mesas_ocupadas + acc[zona].mesas_reservadas;
-        acc[zona].porcentaje_ocupacion = Math.round((occupied / acc[zona].total_mesas) * 100);
+        // Calculate occupation percentage (0% por ahora)
+        acc[zona].porcentaje_ocupacion = 0;
 
         return acc;
       }, {} as Record<string, any>);

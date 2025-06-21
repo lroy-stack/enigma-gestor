@@ -8,12 +8,15 @@ import { AuthProvider } from "@/hooks/useAuth";
 import { MainLayout } from "./components/layout/MainLayout";
 import { ScrollToTop } from "./components/common/ScrollToTop";
 import { lazy, Suspense } from "react";
+import { NotificationSystemProvider } from "./components/notifications/NotificationSystemProvider";
 
 // Lazy load páginas para reducir el bundle inicial
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const Reservas = lazy(() => import("./pages/Reservas"));
+const ReservasNueva = lazy(() => import("./pages/ReservasNueva"));
 const Mesas = lazy(() => import("./pages/Mesas"));
 const Clientes = lazy(() => import("./pages/Clientes"));
+const ClientesNuevo = lazy(() => import("./pages/ClientesNuevo"));
 const ClientesEnhanced = lazy(() => import("./pages/ClientesEnhanced"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const Notificaciones = lazy(() => import("./pages/Notificaciones"));
@@ -37,12 +40,13 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <ScrollToTop />
-          <Routes>
+      <NotificationSystemProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <ScrollToTop />
+            <Routes>
             <Route path="/" element={<MainLayout />}>
               <Route index element={<Navigate to="/dashboard" replace />} />
               <Route path="dashboard" element={<Suspense fallback={<PageLoader />}><Dashboard /></Suspense>} />
@@ -55,11 +59,14 @@ const App = () => (
               <Route path="configuracion" element={<Suspense fallback={<PageLoader />}><Configuracion /></Suspense>} />
               <Route path="usuarios" element={<Suspense fallback={<PageLoader />}><Usuarios /></Suspense>} />
               <Route path="ayuda" element={<Suspense fallback={<PageLoader />}><Ayuda /></Suspense>} />
+              <Route path="reservas-nueva" element={<Suspense fallback={<PageLoader />}><ReservasNueva /></Suspense>} />
+              <Route path="clientes-nuevo" element={<Suspense fallback={<PageLoader />}><ClientesNuevo /></Suspense>} />
               <Route path="*" element={<Suspense fallback={<PageLoader />}><NotFound /></Suspense>} />
             </Route>
           </Routes>
         </BrowserRouter>
       </TooltipProvider>
+    </NotificationSystemProvider>
     </AuthProvider>
   </QueryClientProvider>
 );

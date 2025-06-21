@@ -11,10 +11,9 @@ export function TodayReservationsWidget() {
   const getStatusColor = (estado: string) => {
     switch (estado) {
       case 'confirmada': return 'bg-green-100 text-green-800';
-      case 'pendiente_confirmacion': return 'bg-yellow-100 text-yellow-800';
+      case 'pendiente': return 'bg-yellow-100 text-yellow-800';
       case 'completada': return 'bg-blue-100 text-blue-800';
-      case 'cancelada_usuario': return 'bg-red-100 text-red-800';
-      case 'no_show': return 'bg-gray-100 text-gray-800';
+      case 'cancelada': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
@@ -22,10 +21,9 @@ export function TodayReservationsWidget() {
   const getStatusLabel = (estado: string) => {
     switch (estado) {
       case 'confirmada': return 'Confirmada';
-      case 'pendiente_confirmacion': return 'Pendiente';
+      case 'pendiente': return 'Pendiente';
       case 'completada': return 'Completada';
-      case 'cancelada_usuario': return 'Cancelada';
-      case 'no_show': return 'No Show';
+      case 'cancelada': return 'Cancelada';
       default: return estado;
     }
   };
@@ -70,30 +68,29 @@ export function TodayReservationsWidget() {
                       {reservation.hora_reserva?.slice(0, 5)}
                     </span>
                   </div>
-                  <Badge className={getStatusColor(reservation.estado_reserva)}>
-                    {getStatusLabel(reservation.estado_reserva)}
+                  <Badge className={getStatusColor(reservation.estado)}>
+                    {getStatusLabel(reservation.estado)}
                   </Badge>
                 </div>
                 
                 <div className="space-y-1">
                   <div className="font-medium text-sm">
-                    {reservation.cliente_nombre}
+                    {reservation.nombre}
                   </div>
                   <div className="flex items-center gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <Users className="h-3 w-3" />
-                      <span>{reservation.numero_comensales} personas</span>
+                      <span>{reservation.personas} personas</span>
                     </div>
-                    {reservation.numero_mesa && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="h-3 w-3" />
-                        <span>Mesa {reservation.numero_mesa}</span>
-                      </div>
-                    )}
                   </div>
                   {reservation.telefono && (
                     <div className="text-xs text-gray-500">
                       📞 {reservation.telefono}
+                    </div>
+                  )}
+                  {reservation.email && (
+                    <div className="text-xs text-gray-500">
+                      📧 {reservation.email}
                     </div>
                   )}
                 </div>

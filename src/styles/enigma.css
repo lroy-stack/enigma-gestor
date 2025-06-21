@@ -226,3 +226,50 @@
 .loading-spinner {
   @apply animate-spin rounded-full border-b-2 border-enigma-primary;
 }
+
+/* Custom styles for components */
+.ios-touch-feedback:active {
+  transform: scale(0.98);
+  transition: transform 0.1s ease-in-out;
+}
+
+/* Formulario de reservas */
+.ios-input {
+  @apply w-full px-4 py-3 rounded-ios-lg border border-enigma-neutral-300 bg-white text-enigma-neutral-900 placeholder-enigma-neutral-500 focus:border-enigma-primary focus:ring-2 focus:ring-enigma-primary/20 transition-all duration-200;
+}
+
+.ios-input:focus {
+  @apply outline-none shadow-ios;
+}
+
+.ios-select {
+  @apply w-full px-4 py-3 rounded-ios-lg border border-enigma-neutral-300 bg-white text-enigma-neutral-900 focus:border-enigma-primary focus:ring-2 focus:ring-enigma-primary/20 transition-all duration-200;
+}
+
+.ios-textarea {
+  @apply w-full px-4 py-3 rounded-ios-lg border border-enigma-neutral-300 bg-white text-enigma-neutral-900 placeholder-enigma-neutral-500 focus:border-enigma-primary focus:ring-2 focus:ring-enigma-primary/20 transition-all duration-200;
+}
+
+.ios-textarea:focus {
+  @apply outline-none shadow-ios;
+}
+
+/* Form labels */
+.form-label {
+  @apply text-enigma-neutral-700 font-medium text-sm mb-2 block;
+}
+
+/* Form errors */
+.form-error {
+  @apply text-red-600 text-xs mt-1;
+}
+
+/* Success states */
+.form-success {
+  @apply border-green-400 focus:border-green-500 focus:ring-green-500/20;
+}
+
+/* Error states */
+.form-error-state {
+  @apply border-red-400 focus:border-red-500 focus:ring-red-500/20;
+}

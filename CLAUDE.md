@@ -19,7 +19,7 @@ Enigma GESTOR is a comprehensive restaurant management system for "Enigma Cocina
 
 ```bash
 # Development
-npm run dev          # Start development server (Vite)
+npm run dev          # Start development server on port 8080 (Vite)
 
 # Build & Preview
 npm run build        # Build for production
@@ -39,6 +39,14 @@ supabase db push     # Push schema changes
 supabase db pull     # Pull remote schema
 supabase migration new <name>  # Create new migration
 supabase gen types typescript --local > src/integrations/supabase/types.ts  # Generate types
+```
+
+## Environment Variables
+
+Required environment variables:
+```bash
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 ## Project Structure
@@ -138,6 +146,46 @@ Key tables:
 - Tanstack Query for server state management
 - Custom hooks wrapping Supabase queries
 - Real-time subscriptions for live updates
+- Standard query pattern:
+```typescript
+export function useResourceName(filters?: FilterType) {
+  return useQuery({
+    queryKey: ['resource-name', filters],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('table_name')
+        .select('fields')
+        .filters();
+      
+      if (error) throw error;
+      return data;
+    },
+    staleTime: 30000,
+    gcTime: 300000,
+    refetchOnWindowFocus: false,
+  });
+}
+```
+
+### Real-time Subscriptions
+```typescript
+useEffect(() => {
+  const channel = supabase
+    .channel('table-changes')
+    .on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'table_name'
+    }, (payload) => {
+      queryClient.invalidateQueries(['query-key']);
+    })
+    .subscribe();
+
+  return () => {
+    supabase.removeChannel(channel);
+  };
+}, []);
+```
 
 ### Component Organization
 - Feature-based folder structure
@@ -170,7 +218,10 @@ Key tables:
 ## Design System
 
 ### Custom Styles
-- `styles/enigma.css` - Restaurant-specific styles
+- `styles/enigma.css` - Restaurant-specific styles with brand colors:
+  - Primary: `#237584` (Corporate blue)
+  - Secondary: `#9FB289` (Natural green)  
+  - Accent: `#CB5910` (Warm orange)
 - `styles/ios-design-system.css` - iOS-styled components for mobile experience
 - Tailwind CSS for utility classes
 - shadcn/ui for consistent component design
