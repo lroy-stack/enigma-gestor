@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -147,6 +146,24 @@ export const useNotifications = () => {
     }
   };
 
+  const cleanupDuplicates = async () => {
+    try {
+      console.log('🧹 Cleaning up duplicate notifications...');
+      const { data, error } = await supabase.rpc('cleanup_duplicate_notifications');
+
+      if (error) throw error;
+
+      console.log(`✅ Cleaned up ${data} duplicate notifications.`);
+      // Refetch notifications to update the UI immediately
+      fetchNotifications();
+      return data;
+    } catch (err) {
+      console.error('❌ Error cleaning up duplicates:', err);
+      setError('Error al limpiar notificaciones duplicadas');
+      throw err;
+    }
+  };
+
   const createNotification = async (notificationData: {
     type_code: string;
     title: string;
@@ -217,6 +234,7 @@ export const useNotifications = () => {
     markAsRead,
     markAllAsRead,
     createNotification,
+    cleanupDuplicates,
     refetch: fetchNotifications
   };
 };

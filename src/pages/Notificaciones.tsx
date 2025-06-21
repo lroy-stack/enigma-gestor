@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Bell, Settings, Check, Filter, Search, Clock } from 'lucide-react';
+import { Bell, Settings, Check, Filter, Search, Clock, Trash2 } from 'lucide-react';
 import { IOSCard, IOSCardContent, IOSCardHeader, IOSCardTitle } from '@/components/ui/ios-card';
 import { IOSButton } from '@/components/ui/ios-button';
 import { IOSBadge } from '@/components/ui/ios-badge';
@@ -10,6 +9,7 @@ import { NotificationModal } from '@/components/notifications/NotificationModal'
 import { NotificationDemo } from '@/components/notifications/NotificationDemo';
 import { NotificationIntegrationDemo } from '@/components/notifications/NotificationIntegrationDemo';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { toast } from 'sonner';
 import type { Notification } from '@/hooks/useNotifications';
 
 export default function Notificaciones() {
@@ -19,7 +19,8 @@ export default function Notificaciones() {
     loading,
     error,
     unreadCount,
-    markAllAsRead
+    markAllAsRead,
+    cleanupDuplicates
   } = useNotifications();
 
   // Debug: Log del hook de notificaciones
@@ -36,6 +37,7 @@ export default function Notificaciones() {
   const [filterType, setFilterType] = useState('all');
   const [filterStatus, setFilterStatus] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [cleaningUp, setCleaningUp] = useState(false);
 
   React.useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -69,6 +71,22 @@ export default function Notificaciones() {
   const handleNotificationClick = (notification: Notification) => {
     setSelectedNotification(notification);
     setShowModal(true);
+  };
+
+  const handleCleanupDuplicates = async () => {
+    setCleaningUp(true);
+    try {
+      const deletedCount = await cleanupDuplicates();
+      toast.success(`Se han eliminado ${deletedCount} notificaciones duplicadas`, {
+        duration: 4000
+      });
+    } catch (error) {
+      toast.error('Error al limpiar notificaciones duplicadas', {
+        duration: 4000
+      });
+    } finally {
+      setCleaningUp(false);
+    }
   };
 
   const filteredNotifications = getFilteredNotifications();
@@ -128,6 +146,20 @@ export default function Notificaciones() {
             </div>
             
             <div className="flex gap-3">
+              <IOSButton 
+                variant="outline"
+                onClick={handleCleanupDuplicates}
+                disabled={cleaningUp || totalNotifications === 0}
+                className="text-white"
+                style={{ 
+                  backgroundColor: '#CB5910',
+                  borderColor: '#CB5910'
+                }}
+              >
+                <Trash2 size={20} className="mr-2" />
+                {cleaningUp ? 'Limpiando...' : 'Limpiar Duplicados'}
+              </IOSButton>
+              
               <IOSButton 
                 variant="outline"
                 onClick={markAllAsRead}
