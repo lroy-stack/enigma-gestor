@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Bell, Plus, Send, AlertCircle } from 'lucide-react';
+import { Bell, Plus, Send, AlertCircle, UserCheck } from 'lucide-react';
 import { IOSCard, IOSCardContent, IOSCardHeader, IOSCardTitle } from '@/components/ui/ios-card';
 import { IOSButton } from '@/components/ui/ios-button';
 import { useNotifications } from '@/hooks/useNotifications';
@@ -23,6 +23,33 @@ export function NotificationDemo() {
       message: 'Sr. Rodriguez ha llegado - Mesa 15',
       priority: 'high' as const,
       data: { cliente_nombre: 'Sr. Rodriguez', mesa: '15' }
+    },
+    {
+      type_code: 'customer_modified',
+      title: 'Contacto Modificado',
+      message: 'María García - Preferencias actualizadas',
+      priority: 'normal' as const,
+      data: { 
+        cliente_nombre: 'María García', 
+        cambios: {
+          preferencias_comida: { 
+            old: 'Sin preferencias',
+            new: 'Sin gluten, vegetariano'
+          }
+        }
+      }
+    },
+    {
+      type_code: 'reservation_upcoming',
+      title: 'Reserva Próxima',
+      message: 'En 15 minutos llega: Carlos Pérez (4 personas)',
+      priority: 'high' as const,
+      data: { 
+        cliente_nombre: 'Carlos Pérez',
+        personas: 4,
+        hora_reserva: '20:00',
+        mesa: 'M8'
+      }
     },
     {
       type_code: 'table_available',
@@ -148,6 +175,7 @@ export function NotificationDemo() {
                 <li>• Comprueba que el contador se actualice correctamente</li>
                 <li>• Navega a la página de notificaciones para ver todas</li>
                 <li>• Prueba marcar como leídas individualmente o todas</li>
+                <li>• Prueba la nueva función "Limpiar Duplicados"</li>
               </ul>
             </div>
           </div>

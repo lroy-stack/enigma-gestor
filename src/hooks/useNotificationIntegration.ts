@@ -1,6 +1,8 @@
 import { useEffect, useCallback } from 'react';
 import { useNotificationEmitter } from './useNotificationEmitter';
 import { useQueryClient } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { format, addMinutes, parseISO } from 'date-fns';
 
 /**
  * Hook para integrar notificaciones automáticas con las operaciones existentes
@@ -44,16 +46,16 @@ export const useNotificationIntegration = () => {
               emitReservaEvent('reserva_cancelada_usuario', newRes);
               break;
             case 'no_show':
-              emitReservaEvent('reserva_proxima_15min', newRes); // Placeholder for no_show event
+              emitReservaEvent('reserva_no_show', newRes);
               break;
           }
         }
 
         // Detectar modificaciones en datos
-        const fieldsToCheck = ['fecha_reserva', 'hora_reserva', 'personas', 'notas'];
+        const fieldsToCheck = ['fecha_reserva', 'hora_reserva', 'personas', 'notas', 'preferencia_mesa', 'requisitos_dieteticos'];
         const hasChanges = fieldsToCheck.some(field => oldRes[field] !== newRes[field]);
         
-        if (hasChanges) {
+        if (hasChanges && oldRes.estado === newRes.estado) { // Solo notificar si no es cambio de estado
           emitReservaEvent('reserva_modificada', newRes, {
             changes: fieldsToCheck.reduce((acc, field) => {
               if (oldRes[field] !== newRes[field]) {
@@ -87,17 +89,54 @@ export const useNotificationIntegration = () => {
       });
     });
 
-    // Detectar cambios en status VIP
+    // Detectar cambios en clientes existentes
     newData.forEach(newClient => {
       const oldClient = oldData.find(old => old.id === newClient.id);
-      if (oldClient && oldClient.vip_status !== newClient.vip_status && newClient.vip_status) {
-        emitClienteEvent('cliente_vip_reserva', newClient, {
-          vip_upgrade: true,
-          timestamp: new Date().toISOString()
-        });
+      if (oldClient) {
+        // Campos a verificar para detectar cambios importantes
+        const fieldsToCheck = [
+          'name', 'last_name', 'email', 'phone', 
+          'vip_status', 'preferencias_comida', 'restricciones_dieteticas',
+          'notas_internas'
+        ];
+        
+        const hasChanges = fieldsToCheck.some(field => oldClient[field] !== newClient[field]);
+        
+        if (hasChanges) {
+          const changes = fieldsToCheck.reduce((acc, field) => {
+            if (oldClient[field] !== newClient[field]) {
+              acc[field] = { old: oldClient[field], new: newClient[field] };
+            }
+            return acc;
+          }, {} as any);
+          
+          // Destacar cambio de estado VIP
+          if (oldClient.vip_status !== newClient.vip_status && newClient.vip_status) {
+            emitClienteEvent('cliente_vip_reserva', newClient, {
+              vip_upgrade: true,
+              timestamp: new Date().toISOString(),
+              changes
+            });
+          } else {
+            // Otros cambios en el cliente
+            emit({
+              eventType: 'cliente_modificado' as any,
+              title: 'Contacto Modificado',
+              message: `Información de ${newClient.name} ${newClient.last_name} ha sido actualizada`,
+              priority: 'normal',
+              data: {
+                client: newClient,
+                changes,
+                timestamp: new Date().toISOString()
+              },
+              actions: ['Ver perfil', 'Ver cambios'],
+              cliente_id: newClient.id
+            });
+          }
+        }
       }
     });
-  }, [emitClienteEvent]);
+  }, [emitClienteEvent, emit]);
 
   // Función para detectar cambios en mesas y emitir notificaciones
   const handleMesaChange = useCallback((
@@ -120,7 +159,7 @@ export const useNotificationIntegration = () => {
               emitMesaEvent('mesa_liberada', newMesa);
               break;
             case 'fuera_servicio':
-              emitMesaEvent('mesa_tiempo_limite_100', newMesa); // Placeholder for out of service
+              emitMesaEvent('mesa_fuera_servicio', newMesa);
               break;
           }
         }
@@ -211,26 +250,65 @@ export const useNotificationIntegration = () => {
   // Función para verificar eventos basados en tiempo
   const checkTimeBasedEvents = useCallback(async () => {
     try {
-      // Aquí implementaremos la lógica para verificar:
-      // - Reservas próximas (15 min, 2 horas)
-      // - Mesas con tiempo excedido
-      // - Clientes inactivos
-      // - Cumpleaños de clientes
-      
+      console.log('🕐 Verificando eventos basados en tiempo...');
+
+      // Comprobar reservas próximas (15 min)
       const now = new Date();
-      
-      // Esta lógica se implementará cuando tengamos acceso a los datos
-      console.log('🕐 Verificando eventos basados en tiempo...', now);
+      const { data: upcomingReservations, error } = await supabase.rpc(
+        'check_upcoming_reservations',
+        { p_time_window_minutes: 15, p_max_notifications: 5 }
+      );
+
+      if (error) throw error;
+
+      if (upcomingReservations && upcomingReservations.length > 0) {
+        console.log(`✅ Encontradas ${upcomingReservations.length} reservas próximas`);
+
+        // Emitir notificaciones para cada reserva próxima
+        upcomingReservations.forEach((reservation: any) => {
+          // Convertimos los datos de la reserva al formato esperado por emitReservaEvent
+          const reservaData = {
+            id: reservation.reserva_id,
+            nombre: reservation.data.cliente_nombre,
+            fecha_reserva: reservation.data.fecha_reserva,
+            hora_reserva: reservation.data.hora_reserva,
+            personas: reservation.data.personas,
+            mesa: reservation.data.mesa_asignada
+          };
+
+          emitReservaEvent('reserva_proxima_15min', reservaData, {
+            detected_by: 'time_check',
+            timestamp: new Date().toISOString()
+          });
+        });
+      } else {
+        console.log('ℹ️ No hay reservas próximas en este momento');
+      }
+
+      // Aquí podrían añadirse más verificaciones basadas en tiempo:
+      // - Mesas con tiempo excedido
+      // - Clientes con cumpleaños próximos
+      // - Reservas que no se han confirmado y la fecha se acerca
       
     } catch (error) {
-      console.error('Error verificando eventos basados en tiempo:', error);
+      console.error('❌ Error verificando eventos basados en tiempo:', error);
     }
-  }, []);
+  }, [emitReservaEvent]);
 
   // Configurar verificación periódica de eventos basados en tiempo
   useEffect(() => {
+    // Ejecutar verificación inicial después de un breve retraso
+    const initialTimeout = setTimeout(() => {
+      checkTimeBasedEvents();
+    }, 5000); // 5 segundos después de cargar
+
+    // Configurar intervalo regular
     const interval = setInterval(checkTimeBasedEvents, 60000); // Cada minuto
-    return () => clearInterval(interval);
+    
+    return () => {
+      clearTimeout(initialTimeout);
+      clearInterval(interval);
+    };
   }, [checkTimeBasedEvents]);
 
   return {
