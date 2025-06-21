@@ -39,13 +39,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .select('*')
         .eq('user_id', userId)
         .eq('activo', true)
-        .single();
+        .maybeSingle(); // Changed from .single() to .maybeSingle()
       
       if (error) {
         console.error('AuthProvider - Error fetching personal data:', error);
-        if (error.code === 'PGRST116') {
-          console.log('AuthProvider - No personal record found for user');
-        }
+        return null;
+      }
+      
+      if (!data) {
+        console.log('AuthProvider - No personal record found for user');
         return null;
       }
       
